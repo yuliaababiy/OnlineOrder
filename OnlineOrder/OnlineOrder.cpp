@@ -4,8 +4,23 @@
 #include <string>
 #include <algorithm>
 #include <sstream>
+#include <map> // Include map for product constants
 
 using namespace std;
+
+// Constants for products and their prices
+const map<string, double> productPrices = {
+    {"Milk", 2.0},
+    {"Chocolate", 3.0},
+    {"Bread", 1.5},
+    {"Eggs", 1.75},
+    {"Cereal", 4.0},
+    {"Butter", 2.5},
+    {"Juice", 2.25},
+    {"Cheese", 3.5},
+    {"Yogurt", 1.0},
+    {"Cookies", 2.75}
+};
 
 struct Product {
     string name;
@@ -53,16 +68,21 @@ public:
         return isCompleted;
     }
 
-    void addProduct() {
-        Product product;
-        cout << "Enter product name: ";
-        cin >> product.name;
-        cout << "Enter product price: ";
-        cin >> product.price;
-        cout << "Enter product quantity: ";
-        cin >> product.quantity;
-        products.push_back(product);
-        updateTotalAmount();
+    void addProduct(const string& productName) {
+        // Find product in the map
+        auto it = productPrices.find(productName);
+        if (it != productPrices.end()) {
+            Product product;
+            product.name = productName;
+            product.price = it->second; // Set price from the map
+            cout << "Enter product quantity: ";
+            cin >> product.quantity;
+            products.push_back(product);
+            updateTotalAmount();
+        }
+        else {
+            cout << "Product \"" << productName << "\" is not available." << endl;
+        }
     }
 
     void viewOrderDetails() const {
@@ -198,12 +218,37 @@ int main() {
             break;
         case 2:
             if (!orders.empty()) {
+                cout << "Choose the order to add the product:" << endl;
+                for (const auto& order : orders) {
+                    cout << order.getOrderNumber() << ". Order Number: " << order.getOrderNumber() << endl;
+                }
                 cout << "Enter Order Number: ";
-                int num;
-                cin >> num;
-                auto it = find_if(orders.begin(), orders.end(), [num](const Order& o) { return o.getOrderNumber() == num; });
+                int orderNum;
+                cin >> orderNum;
+                auto it = find_if(orders.begin(), orders.end(), [orderNum](const Order& o) { return o.getOrderNumber() == orderNum; });
                 if (it != orders.end()) {
-                    it->addProduct();
+                    string productName;
+                    while (true) {
+                        cout << "Available Products:" << endl;
+                        for (const auto& product : productPrices) {
+                            cout << product.first << " - $" << product.second << endl;
+                        }
+                        cout << "Enter product name (or type 'exit' to go back to the main menu): ";
+                        cin >> productName;
+                        if (productName == "exit") {
+                            break;
+                        }
+                        auto it = productPrices.find(productName);
+                        if (it != productPrices.end()) {
+                            it->second;
+                            it->first;
+                            it->second;
+                            orders.back().addProduct(productName);
+                        }
+                        else {
+                            cout << "Invalid product name." << endl;
+                        }
+                    }
                 }
                 else {
                     cout << "Order not found." << endl;
